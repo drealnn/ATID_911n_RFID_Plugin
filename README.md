@@ -4,7 +4,7 @@ Cordova plugin for the atid 911n rfid scanner. In development.
 
 Currently supported methods:
 
-'''
+```
 atid.rfid {
   deinitalize : function(successCallback, errorCallback){
 		exec(successCallback, errorCallback, "Rfid", 'deinitalize', []);
@@ -78,7 +78,7 @@ atid.rfid {
 
 
 };
-'''
+```
 
 Methods can be categorized into four sections: 
 lifecycle (wakeup, sleep, deinitialize), setters & getters, read/write, and events.
@@ -87,9 +87,9 @@ Use readTagSingle/readTagContinous to grap the rfid EPC and RSSI.
 
 The difference between readTagSingle/Continuous vs readTagMemory is the latter allows the selection of specific words to be grabbed from the rfid chip based on the given json arguments; however keep in mind both readTagMemory/writeTagMemory don't natively grab the rssi value from its event listener.
 
-The args json object for readTagMemory/writeTagMemory is as follows (each name/value pair is optional, defaults will be used, offset and length are measured in 16 bit words ie. 2 = the leftmost 32 bits):
+The args json object for readTagMemory/writeTagMemory is as follows (each name/value pair is optional, defaults will be used, offset and length are measured in 16 bit words ie. length =  2 : get the leftmost 32 bits):
 
-'''
+```
 start_readTagMemory
 {
   'bankType' : 'EPC'
@@ -105,5 +105,5 @@ start_writeTagMemory
   'password' : ''
   'data' : ''
 }
-'''
+```
 
