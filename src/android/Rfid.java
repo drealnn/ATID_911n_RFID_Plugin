@@ -4,6 +4,7 @@ import com.atid.lib.dev.ATRfidManager;
 import com.atid.lib.dev.ATRfidReader;
 import com.atid.lib.dev.event.RfidReaderEventListener;
 import com.atid.lib.dev.rfid.type.ActionState;
+import com.atid.lib.dev.rfid.type.BankType;
 import com.atid.lib.dev.rfid.type.ConnectionState;
 import com.atid.lib.dev.rfid.type.ResultCode;
 import com.atid.lib.dev.rfid.type.TagType;
@@ -44,7 +45,7 @@ import org.json.JSONObject;
 
 public class Rfid extends CordovaPlugin implements RfidReaderEventListener {
 
-private static final String TAG = "MainActivity"; 
+private static final String TAG = "RFID Native"; 
 
 protected ATRfidReader mReader;
 private PowerManager.WakeLock mWakeLock = null;
@@ -66,7 +67,7 @@ private View currentView = null;
 public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
     PluginResult result = new PluginResult(PluginResult.Status.NO_RESULT);
     result.setKeepCallback(true);
-
+    
     // lifecycle functions //
 
     if (action.equals("deinitalize")){
@@ -75,7 +76,7 @@ public boolean execute(String action, JSONArray args, CallbackContext callbackCo
     }
     else if (action.equals("wakeup")){
         Log.d(TAG, "+- wakeup scanner");
-        
+
         if(mReader != null)
             ATRfidManager.wakeUp();
         return true;
@@ -100,27 +101,46 @@ public boolean execute(String action, JSONArray args, CallbackContext callbackCo
         return true;
     }
 
-    // getters and setters // 
-
+    // getters and setters //
+    
+    else if (action.equals("getActionState")){
+    	callbackContext.success((mReader.getAction()) + "");
+    	return true;
+    }
     else if (action.equals("getPowerRange")){
         Log.d(TAG, "++Get Power Range");
-        callbackContext.success(new JSONObject("{\'min\': \'" + mReader.getPowerRange().getMin() + "\' , \'max\' : \'" + mReader.getPowerRange().getMax() + "\' }"));
+        try {
+            callbackContext.success(new JSONObject("{\'min\': \'" + mReader.getPowerRange().getMin() + "\' , \'max\' : \'" + mReader.getPowerRange().getMax() + "\' }"));
+        } catch (ATRfidReaderException e)
+        {
+            callbackContext.error("failed to get power range");
+        }
         Log.d(TAG, "--Get Power Range");
-        
+
         return true;
     }
     else if (action.equals("getPower")){
         Log.d(TAG, "++Get Power");
-        callbackContext.success("" + mReader.getPower());
+        try {
+            callbackContext.success("" + mReader.getPower());
+        }catch (ATRfidReaderException e)
+        {
+            callbackContext.error("failed to get power");
+        }
         Log.d(TAG, "--Get Power");
-        
+
         return true;
     }
     else if (action.equals("getOperationTime")){
         Log.d(TAG, "++Get OperationTime");
-        callbackContext.success("" + mReader.getOperationTime());
+        try {
+            callbackContext.success("" + mReader.getOperationTime());
+        } catch (ATRfidReaderException e)
+        {
+            callbackContext.error("failed to get operation time");
+        }
         Log.d(TAG, "--Get OperationTime");
-        
+
         return true;
     }
     else if (action.equals("setPower")){
@@ -134,14 +154,14 @@ public boolean execute(String action, JSONArray args, CallbackContext callbackCo
                     e.getCode()), e);
             callbackContext.error("failed to set power level");
         }
-        
+
         Log.d(TAG, "--set power level");
-        
+
         return true;
     }
     else if (action.equals("setOperationTime")){
         Log.d(TAG, "++set operation time");
-        
+
         try {
             mReader.setOperationTime(args.getInt(0));
             callbackContext.success("successfully set operation time");
@@ -153,12 +173,12 @@ public boolean execute(String action, JSONArray args, CallbackContext callbackCo
         }
 
         Log.d(TAG, "--set operation time");
-        
+
         return true;
     }
     else if (action.equals("setInventoryTime")){
         Log.d(TAG, "++setInventoryTime");
-        
+
         try {
             mReader.setInventoryTime(args.getInt(0));
             callbackContext.success("successfully setInventoryTime");
@@ -170,14 +190,14 @@ public boolean execute(String action, JSONArray args, CallbackContext callbackCo
         }
 
         Log.d(TAG, "--setInventoryTime");
-        
+
         return true;
     }
     else if (action.equals("setIdleTime")){
         Log.d(TAG, "++ setIdleTime");
-        
+
         try {
-            mReader.setIdleTime(mIdleTime);
+            mReader.setIdleTime(args.getInt(0));
             callbackContext.success("successfully setIdleTime");
         } catch (ATRfidReaderException e) {
             Log.e(TAG, String.format(
@@ -187,39 +207,53 @@ public boolean execute(String action, JSONArray args, CallbackContext callbackCo
         }
 
         Log.d(TAG, "-- setIdleTime");
-        
+
         return true;
     }
-    
+
     // Reading and Writing //
-    
-    else if (action.equals('start_readContinuous'))
+
+    else if (action.equals("start_readContinuous"))
     {
         startAction(TagType.Tag6C, true, callbackContext);
+        return true;
     }
-    else if (action.equals('start_readSingle'))
+    else if (action.equals("start_readSingle"))
     {
         startAction(TagType.Tag6C, false, callbackContext);
+        return true;
     }
-    else if (action.equals('stop_read'))
+    else if (action.equals("start_readMemory"))
+    {
+        startAction(TagType.Tag6C, args.getJSONObject(0), true, callbackContext);
+        return true;
+    }
+    else if (action.equals("start_writeMemory"))
+    {
+        startAction(TagType.Tag6C, args.getJSONObject(0), false, callbackContext);
+        return true;
+    }
+    else if (action.equals("stop_read"))
     {
         stopAction(callbackContext);
+        return true;
     }
-    
+    else if (action.equals("isStopped"))
+    {
+        callbackContext.success((mReader.getAction() == ActionState.Stop) + "");
+        return true;
+    }
+
 
 
     // Events //
-   
+
     else if(action.equalsIgnoreCase("register_keyDown")){
             this.keydown_callback = callbackContext;
             return true;
     }
     else if(action.equalsIgnoreCase("register_keyUp")){
             this.keyup_callback = callbackContext;
-            return true;
-    }
-    else if(action.equalsIgnoreCase("register_decode")){
-            this.getDecode_callback = callbackContext;
             return true;
     }
     else if(action.equalsIgnoreCase("onReaderReadTag")){
@@ -240,13 +274,9 @@ public void initialize(CordovaInterface cordova, CordovaWebView webView) {
             Log.e(TAG, "Failure to initialize RFID device. Aborting...");
             return;
     }
-    
-    // Initialize Sound Pool
-    //this.mSoundPool = new SoundPool(1, AudioManager.STREAM_MUSIC, 0);
-    //this.mBeepSuccess = this.mSoundPool.load(context, R.raw.success, 1);
-    //this.mBeepFail = this.mSoundPool.load(context, R.raw.fail, 1);
-    // Initialize Vibrator
-    /*this.mVibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);*/
+
+    ATRfidManager.wakeUp();
+    mReader.setEventListener(this);
     
     this.currentView = webView.getView();
     this.currentView.setOnKeyListener(
@@ -270,9 +300,9 @@ private void deinitalize(){
     Log.d(TAG, "--- onDeinitalize");
 }
 
-protected void startAction(TagType tagType, boolean isContinuous, CallBackContext callbackContext) {
+protected void startAction(TagType tagType, boolean isContinuous, CallbackContext callbackContext) {
 
-    ResultCode res;
+    ResultCode res = null;
 
     if (isContinuous) {
         // Multi Reading
@@ -328,11 +358,82 @@ protected void startAction(TagType tagType, boolean isContinuous, CallBackContex
             break;
         }
     }
-    callbackContext.success(isContinuous ? "successfully reading continuously" : "successfully read single");
+    callbackContext.success(isContinuous ? "successfully reading continuously: " + res : "successfully read single: " + res);
     Log.i(TAG, "INFO. startAction()");
 }
 
-protected void stopAction(CallBackContext callbackContext) {
+protected void startAction(TagType tagType, JSONObject params, boolean isRead, CallbackContext callbackContext) {
+	ResultCode res;
+    BankType bank;
+    int offset;
+    int length;
+    String data;
+    String password;
+
+	// TODO: set up logic for multiple banktype selection
+	try {
+        bank = params.isNull("bankType") ? BankType.EPC : params.getString("bankType").equalsIgnoreCase("EPC") ? BankType.EPC : null;
+		offset = params.isNull("offset") ? 2 :  params.getInt("offset");
+		length = params.isNull("length") ? 2 : params.getInt("length");
+		password =  params.isNull("password") ? "" : params.getString("password");
+        data =  params.isNull("data") ? "" : params.getString("data");
+        
+	} catch(JSONException e)
+	{
+		e.printStackTrace();
+		callbackContext.error("Failed to read/write to memory, invalid JSON error.");
+		return;
+	}
+
+	switch (tagType) {
+		case Tag6C:
+			//bank = getBank();
+			if (isRead){
+				if ((res = mReader.readMemory6c(bank, offset, length, password)) != ResultCode.NoError) {
+					Log.e(TAG,
+							String.format(
+									"ERROR. startAction() - Failed to read memory 6C tag [%s]",
+									res));
+					
+					callbackContext.error(String.format(
+									"ERROR. startAction() - Failed to read memory 6C tag [%s]",
+									res));
+					return;
+				}
+
+				callbackContext.success("successfully read memory : " + res);
+			}
+			else {
+				if ((res = mReader.writeMemory6c(bank, offset, data, password)) != ResultCode.NoError) {
+                    Log.e(TAG,
+                            String.format(
+                                    "ERROR. startAction() - Failed to write memory 6C tag [%s]",
+									res));
+					
+					callbackContext.error(String.format(
+									"ERROR. startAction() - Failed to write memory 6C tag [%s]",
+									res));
+					return;
+				}
+				callbackContext.success("successfully wrote to memory : " + res);
+			}
+			break;
+		case Tag6B:
+			if ((res = mReader.readMemory6b(offset, length)) != ResultCode.NoError) {
+				Log.e(TAG,
+						String.format(
+								"ERROR. startAction() - Failed to read memory 6B tag [%s]",
+								res));
+				
+				return;
+			}
+			break;
+		}
+		
+		Log.i(TAG, "INFO. startAction()");
+}
+
+protected void stopAction(CallbackContext callbackContext) {
 
     ResultCode res;
 
@@ -377,22 +478,22 @@ public void onReaderReadTag(ATRfidReader reader, String tag, float rssi) {
 
     Log.i(TAG,
             String.format("EVENT. onReaderReadTag([%s], %.2f)", tag, rssi));
-    if (this.onReaderReadTag == null)
-        return false;
+    if (this.onReaderReadTag_callback == null)
+        return;
     
     try {
-        String str = "{\'tag\':\'" + tag + "\' , \'rssi\': \'" + rssi + "\' }"
+        String str = "{\'tag\':\'" + tag + "\' , \'rssi\': \'" + rssi + "\' }";
         PluginResult result = new PluginResult(PluginResult.Status.OK, new JSONObject(str));
         result.setKeepCallback(true);
         this.onReaderReadTag_callback.sendPluginResult(result);
-        return true;
+        return;
     } catch(Exception e)
     {
         e.printStackTrace();
         PluginResult result = new PluginResult(PluginResult.Status.ERROR, "Error in handling onReaderReadTag event");
         result.setKeepCallback(true);
         this.onReaderReadTag_callback.sendPluginResult(result);
-        return false;
+        return;
     }
 }
 
@@ -402,22 +503,22 @@ public void onReaderResult(ATRfidReader reader, ResultCode code,
     Log.i(TAG, String.format("EVENT. onReaderResult(%s, %s, [%s], [%s]",
             code, action, epc, data));
 
-    if (this.onReaderResult == null)
-        return false;
+    if (this.onReaderResult_callback == null)
+        return;
     
     try {
         String str = String.format("{\'code\': \'%s\', \'action\': \'%s\', \'epc\':\'%s\', \'data\':\'%s\'}", code, action, epc, data);
         PluginResult result = new PluginResult(PluginResult.Status.OK, new JSONObject(str));
         result.setKeepCallback(true);
         this.onReaderResult_callback.sendPluginResult(result);
-        return true;
+        return;
     } catch(Exception e)
     {
         e.printStackTrace();
         PluginResult result = new PluginResult(PluginResult.Status.ERROR, "Error in handling onReaderResult event");
         result.setKeepCallback(true);
         this.onReaderResult_callback.sendPluginResult(result);
-        return false;
+        return;
     }
 }
 
@@ -427,8 +528,7 @@ public void onReaderStateChanged(ATRfidReader reader, ConnectionState state) {
 }
 
 public boolean doKey(View v, int keyCode, KeyEvent event) {
-    
-Log.i(TAG, "triggering key event");
+
     if (event.getAction() == KeyEvent.ACTION_UP) {
         return KeyUp(keyCode, event);
     }
@@ -438,6 +538,8 @@ Log.i(TAG, "triggering key event");
     return false;
 }
 
+// ####### Key event functions
+
 private boolean KeyDown(int keyCode, KeyEvent event){
     //if(keydown_callback == null){
       //  return true;
@@ -445,20 +547,15 @@ private boolean KeyDown(int keyCode, KeyEvent event){
     //PluginResult result = new PluginResult(PluginResult.Status.OK, Integer.toString(keyCode));
     //result.setKeepCallback(true);
     //keydown_callback.sendPluginResult(result);
-    Log.i(TAG, "key down pressed " + keyCode);
+
 
     if (this.keydown_callback == null)
         return false;
-    
+
     try {
-        String str = "";
-        if (event != null) {
-            str = String.valueOf((char) event.getUnicodeChar());
-        } else {
-            str = String.valueOf(Character.toChars(keyCode)[0]);
-        }
         
-        PluginResult result = new PluginResult(PluginResult.Status.OK, keyCode + "");
+        String str = String.format("{\'keyCode\': \'%s\', \'repeatCount\' : \'%s\' }", keyCode + "", event.getRepeatCount() + "");
+        PluginResult result = new PluginResult(PluginResult.Status.OK, new JSONObject(str));
         result.setKeepCallback(true);
         this.keydown_callback.sendPluginResult(result);
         return true;
@@ -479,19 +576,13 @@ private boolean KeyUp(int keyCode, KeyEvent event){
     //PluginResult result = new PluginResult(PluginResult.Status.OK, Integer.toString(keyCode));
     //result.setKeepCallback(true);
     //keyup_callback.sendPluginResult(result);
-    Log.i(TAG, "key up pressed " + keyCode);
     if (this.keyup_callback == null)
         return false;
     
     try {
-        String str = "";
-        if (event != null) {
-            str = String.valueOf((char) event.getUnicodeChar());
-        } else {
-            str = String.valueOf(Character.toChars(keyCode)[0]);
-        }
         
-        PluginResult result = new PluginResult(PluginResult.Status.OK, keyCode + "");
+        String str = String.format("{\'keyCode\': \'%s\', \'repeatCount\' : \'%s\' }", keyCode + "", event.getRepeatCount() + "");
+        PluginResult result = new PluginResult(PluginResult.Status.OK, new JSONObject(str));
         result.setKeepCallback(true);
         this.keyup_callback.sendPluginResult(result);
         return true;

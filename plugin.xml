@@ -30,7 +30,7 @@
             <clobbers target="atid.constants" />
         </js-module>
 
-        <source-file src="src/android/Barcode.java" target-dir="src/com/atid/app/mybarcode" />
+        <source-file src="src/android/Rfid.java" target-dir="src/com/atid/app/myRfid" />
 
         <lib-file src="src/android/libs/atid.dev.barcode.jar" />
 	<lib-file src="src/android/libs/atid.dev.rfid.jar" />

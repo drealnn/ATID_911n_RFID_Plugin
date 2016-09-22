@@ -9,8 +9,8 @@
     
     <platform name="android">
         <config-file target="config.xml" parent="/*">
-            <feature name="Barcode">
-                <param name="android-package" value="com.atid.app.mybarcode.Barcode"/>
+            <feature name="Rfid">
+                <param name="android-package" value="com.atid.app.myRfid.Rfid"/>
             </feature>
         </config-file>
 
