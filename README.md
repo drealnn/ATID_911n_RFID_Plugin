@@ -106,4 +106,32 @@ start_writeTagMemory
   'data' : ''
 }
 ```
-
+# methods currently tested:
+```
+onReaderReadTag : function(successCallback, errorCallback){
+	exec(successCallback, errorCallback, "Rfid", 'onReaderReadTag', []);
+},
+onReaderResult :  function(successCallback, errorCallback){
+	exec(successCallback, errorCallback, "Rfid", 'onReaderResult', []);
+},
+start_readTagSingle :  function(successCallback, errorCallback){
+	exec(successCallback, errorCallback, "Rfid", 'start_readSingle', []);
+},
+start_readTagContinuous :  function(successCallback, errorCallback){
+	exec(successCallback, errorCallback, "Rfid", 'start_readContinuous', []);
+},
+stop_scan :  function(successCallback, errorCallback){
+		exec(successCallback, errorCallback, "Rfid", 'stop_read', []);
+},
+isStopped :  function(successCallback, errorCallback){
+	exec(successCallback, errorCallback, "Rfid", 'isStopped', []);
+},
+onKeyUp : function(successCallback, errorCallback){
+	exec(successCallback, errorCallback, "Rfid", 'register_keyUp', []);
+},
+onKeyDown : function(successCallback, errorCallback){
+	exec(successCallback, errorCallback, "Rfid", 'register_keyDown', []);
+}
+```
+Lifecycle functions should be good to go in theory, just be sure to hook it to the corresponding cordova lifecycle event.
+The setters/getters we may not need. The get/set power method may prove useful however. 
