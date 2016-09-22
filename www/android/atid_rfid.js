@@ -29,17 +29,17 @@ module.exports =  {
 	getOperationTime : function(successCallback, errorCallback){
 		exec(successCallback, errorCallback, "Rfid", 'getOperationTime', []);
 	},
-	setPower : function(successCallback, errorCallback){
-		exec(successCallback, errorCallback, "Rfid", 'setPower', []);
+	setPower : function(powerInt, successCallback, errorCallback){
+		exec(successCallback, errorCallback, "Rfid", 'setPower', [powerInt]);
 	},
-	setOperationTime : function(successCallback, errorCallback){
-		exec(successCallback, errorCallback, "Rfid", 'setOperationTime', []);
+	setOperationTime : function(operationTime, successCallback, errorCallback){
+		exec(successCallback, errorCallback, "Rfid", 'setOperationTime', [operationTime]);
 	},
-	setInventoryTime : function(successCallback, errorCallback){
-		exec(successCallback, errorCallback, "Rfid", 'setInventoryTime', []);
+	setInventoryTime : function(inventoryTime, successCallback, errorCallback){
+		exec(successCallback, errorCallback, "Rfid", 'setInventoryTime', [inventoryTime]);
 	},
-	setIdleTime : function(successCallback, errorCallback){
-		exec(successCallback, errorCallback, "Rfid", 'setIdleTime', []);
+	setIdleTime : function(idleTime, successCallback, errorCallback){
+		exec(successCallback, errorCallback, "Rfid", 'setIdleTime', [idleTime]);
 	},
 	onReaderReadTag : function(successCallback, errorCallback){
 		exec(successCallback, errorCallback, "Rfid", 'onReaderReadTag', []);
@@ -70,7 +70,7 @@ module.exports =  {
 	},
 	onKeyDown : function(successCallback, errorCallback){
 		exec(successCallback, errorCallback, "Rfid", 'register_keyDown', []);
-	},
+	}
 
 
 };
